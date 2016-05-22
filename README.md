@@ -59,7 +59,9 @@ Game instructions
     Authorization: 574128282aaaa
 
 > The parameters 1/1 passed after start are currently default. There I was going to control the type (Regular or Ultimate Tic Tac Toe) and Mode (Versus COM, Versus Human Being or Versus Random Human Being).
+
 > The Authorization parameter passed on the header idenfify the user starting the game.
+
 > This method will return a gameHash that has to be used to play the game.
 
 ## Response
@@ -75,13 +77,16 @@ Game instructions
     {"column":2,"row":2}
 
 > The game hash is used in the URL to identify the game that is being played.
+
 > The Authorization parameter passed on the header idenfify the user playing the game.
+
 > On the body of the request we inform which column and row we would like to check. Default value for user is X. Must be a number between 1 and 3.
 
 ## Response
     {"gameplay":[["O","_","_"],["_","X","_"],["_","_","_"]]}
 
 > In the response we see a gameplay chart of the actual board of Tic Tac Toe. That board already includes COM moves (default value O).
+
 > When the game finishes a message is presented on Response.
 
 # Giving Up
