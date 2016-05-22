@@ -17,7 +17,7 @@ The following items weren't included in this version of the project:
 Technical information
 ---------------------
 
-This project was developed using PHP7 + MySQL + Symfony3. The Symfony framework was 
+This project was developed using PHP7 + MySQL + Symfony3.
 
 Installation
 ------------
