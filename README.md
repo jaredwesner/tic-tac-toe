@@ -1,5 +1,4 @@
-Yet Another Tic Tac Toe Project
--------------------------------
+# Yet Another Tic Tac Toe Project
 
 This is yet another implementation of Tic Tac Toe. Made by me exclusively to the VanHackathon. This was a solution to a challenge presented by BroadbandTV.
 
@@ -14,13 +13,11 @@ The following items weren't included in this version of the project:
 * Possibility to play Ultimate Tic Tac Toe
 * Play online with another human being
 
-Technical information
----------------------
+# Technical information
 
 This project was developed using PHP7 + MySQL + Symfony3.
 
-Installation
-------------
+# Installation
 
 Execute the following steps to run this project:
 Make sure your MySQL service is running with root user with no password.
@@ -32,12 +29,11 @@ Make sure your MySQL service is running with root user with no password.
     php bin/console server:run
 
 
-Game instructions
------------------
+# Game instructions
 
-# First let's login
+## First let's login
 
-## Request
+### Request
     POST /api/user/ HTTP/1.1
     Host: localhost:8000
     Content-Type: application/json
@@ -45,14 +41,14 @@ Game instructions
 
 > Internally we will lookup the email as a strong key for our user. If none is found them we create a new user. If we actually found a user we validate the password.
 
-## Response
+### Response
     {"userHash":"574128282aaaa"}
 
 > It will return the user's UUID hash. This value should be informed in every method to validate user's credentials.
 
-# Now we can start a game
+## Now we can start a game
 
-## Request
+### Request
     POST /api/games/start/1/1 HTTP/1.1
     Host: localhost:8000
     Content-Type: application/json
@@ -64,12 +60,12 @@ Game instructions
 
 > This method will return a gameHash that has to be used to play the game.
 
-## Response
+### Response
     {"gameHash":"574216386bc64"}
 
-# Playing the Game
+## Playing the Game
 
-## Request
+### Request
     PUT /api/games/574216386bc64 HTTP/1.1
     Host: localhost:8000
     Authorization: 574128282aaaa
@@ -82,16 +78,16 @@ Game instructions
 
 > On the body of the request we inform which column and row we would like to check. Default value for user is X. Must be a number between 1 and 3.
 
-## Response
+### Response
     {"gameplay":[["O","_","_"],["_","X","_"],["_","_","_"]]}
 
 > In the response we see a gameplay chart of the actual board of Tic Tac Toe. That board already includes COM moves (default value O).
 
 > When the game finishes a message is presented on Response.
 
-# Giving Up
+## Giving Up
 
-## Request
+### Request
     PUT /api/games/574216386bc64/giveup HTTP/1.1
     Host: localhost:8000
     Authorization: 574128282aaaa
@@ -99,15 +95,15 @@ Game instructions
 
 > Adding the 'giveup' parameter to the end of a game URL will flag this game as abandoned. Every move is now denied.
 
-## Response
+### Response
     {"message":"Game finished without winners. :("}
 
-# Retrieving user's game history
+## Retrieving user's game history
 
-## Request
+### Request
     GET /api/games/userhistory HTTP/1.1
     Host: localhost:8000
     Authorization: 574128282aaaa
 
-## Response
+### Response
     {"gameList":[{"gameHash":"57413b587e4ae","createdAt":"2016-05-22T01:53:44-0300","type":"Regular","mode":"Versus COM","finished":"true","abandoned":"false","gameplay":[["O","_","_"],["X","X","X"],["O","_","_"]],"winner":"PLAYER"},{"gameHash":"5741bc50567a9","createdAt":"2016-05-22T11:04:00-0300","type":"Regular","mode":"Versus COM","finished":"false","abandoned":"false","gameplay":[["_","_","_"],["_","_","_"],["_","_","_"]]},{"gameHash":"5741bc67ee51d","createdAt":"2016-05-22T11:04:23-0300","type":"Regular","mode":"Versus COM","finished":"true","abandoned":"true","gameplay":[["O","X","_"],["_","_","_"],["_","_","_"]]}]}
