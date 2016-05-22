@@ -1,6 +1,6 @@
 # Yet Another Tic Tac Toe Project
 
-This is yet another implementation of Tic Tac Toe. Made by me exclusively to the VanHackathon. This was a solution to a challenge presented by BroadbandTV.
+This is yet another implementation of Tic Tac Toe. This is a solution to a challenge presented by BroadbandTV and I have made it exclusively to the VanHackathon. 
 
 Here are the features of this project:
 * Fully functional RESTful API
@@ -39,7 +39,7 @@ Make sure your MySQL service is running with root user with no password.
     Content-Type: application/json
     {"email":"regisdiogof@gmail.com","password":"mysecretpass"}
 
-> Internally we will lookup the email as a strong key for our user. If none is found them we create a new user. If we actually found a user we validate the password.
+> Internally we will look up the email as a strong key for our user. If none is found then we create a new user. If we actually found a user we validate the password.
 
 ### Response
     {"userHash":"574128282aaaa"}
@@ -54,7 +54,7 @@ Make sure your MySQL service is running with root user with no password.
     Content-Type: application/json
     Authorization: 574128282aaaa
 
-> The parameters 1/1 passed after start are currently default. There I was going to control the type (Regular or Ultimate Tic Tac Toe) and Mode (Versus COM, Versus Human Being or Versus Random Human Being).
+> The parameters 1/1 passed after 'start' parameter are currently default. In my inicial planning I was going to control Type (Regular or Ultimate Tic Tac Toe) and Mode (Versus COM, Versus Human Being or Versus Random Human Being). But now it's only accepting Type Regular and Mode Versus COM.
 
 > The Authorization parameter passed on the header idenfify the user starting the game.
 

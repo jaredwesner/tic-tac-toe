@@ -396,9 +396,7 @@ class GameService {
     {
         $gameplay = json_decode($game->getGamePlay());
         
-        // First, Is it possible to win with this movement?
-        
-        // If not to win then must get in users way
+        $available = array();
         
         for ($col = 0; $col < 3; $col++)
         {
@@ -406,9 +404,11 @@ class GameService {
             {
                 if ($gameplay[$row][$col] == GameService::BLANK_SPACE)
                 {
-                    return array('col' => $col + 1, 'row' => $row + 1);
+                    $available[] = array('col' => $col + 1, 'row' => $row + 1);
                 }
             }
         }
+        
+        return $available[array_rand($available, 1)];
     }
 }
