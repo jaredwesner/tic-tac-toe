@@ -5,6 +5,7 @@ namespace GameBundle\Controller;
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\Controller\Annotations\Post;
 use FOS\RestBundle\Controller\Annotations\Put;
+use FOS\RestBundle\Controller\Annotations\Get;
 use Symfony\Component\HttpFoundation\Request;
 
 class GameController extends FOSRestController
@@ -16,11 +17,10 @@ class GameController extends FOSRestController
     {
         $request = Request::createFromGlobals();
         $userHash = $request->headers->get('Authorization');
-        
+        $service = $this->get('game.service');
         $view = null;
         
         $body = json_decode($request->getContent());
-        $service = $this->get('game.service');
         
         $result = $service->start($userHash, $type, $mode);
         
@@ -47,11 +47,10 @@ class GameController extends FOSRestController
     {
         $request = Request::createFromGlobals();
         $userHash = $request->headers->get('Authorization');
-        
+        $service = $this->get('game.service');        
         $view = null;
         
         $body = json_decode($request->getContent());
-        $service = $this->get('game.service');
         
         $result = $service->play($userHash, $gameHash, $body->column, $body->row);
         
@@ -62,6 +61,62 @@ class GameController extends FOSRestController
             if (array_key_exists('winner', $result))
                 $tmp['winner'] = $result['winner'];
             $view = $this->view($tmp, 200);
+        }
+        else
+        {
+            $view = $this->view([
+                'error' => $result['message']
+            ], 400);
+        }
+        
+        return $this->handleView($view);
+    }
+    
+    /**
+     * @Put("/games/{gameHash}/giveup")
+     */
+    public function giveUpAction($gameHash)
+    {
+        $request = Request::createFromGlobals();
+        $userHash = $request->headers->get('Authorization');
+        $service = $this->get('game.service');
+        $view = null;
+        
+        $result = $service->giveup($userHash, $gameHash);
+        
+        if ($result['success'])
+        {
+            $view = $this->view([
+                'message' => $result['message']
+            ], 200);
+        }
+        else
+        {
+            $view = $this->view([
+                'error' => $result['message']
+            ], 400);
+        }
+        
+        return $this->handleView($view);
+    }
+    
+    /**
+     * @Get("/games/userhistory")
+     */
+    public function getGamesUserHistoryAction()
+    {
+        $request = Request::createFromGlobals();
+        $userHash = $request->headers->get('Authorization');
+        $service = $this->get('game.service');
+        $view = null;
+        
+        $result = $service->getGameUserList($userHash);
+        
+        if ($result['success'])
+        {
+            $view = $this->view([
+                'gameList' => $result['gameList']
+            ], 200);
         }
         else
         {

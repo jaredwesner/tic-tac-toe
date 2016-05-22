@@ -6,7 +6,9 @@ use GameBundle\Entity\Game;
 
 class GameService {
     
-    CONST BLANK_SPACE = '_';
+    const BLANK_SPACE = '_';
+    const PLAYER_X = 'X';
+    const PLAYER_O = 'O';
 
     protected $em;
     
@@ -115,6 +117,9 @@ class GameService {
             if (!$game)
                 throw new \Exception('Game not found for hash '.$gameHash);
                 
+            if ($game->getUser() != $user->getId())
+                throw new \Exception('Access Denied');
+                
             if ($game->getFinished() || $game->getAbandoned())
                 throw new \Exception('This game has already finished. Try start a new one');
                 
@@ -166,9 +171,127 @@ class GameService {
     
     public function giveup($userHash, $gameHash)
     {
+        $validation = array();
         
+        if (!$userHash)
+        {
+            $result = [
+                'success' => false,
+                'message' => 'Authentication Header is required'
+            ];
+            
+            return $result;
+        }
+        
+        try
+        {
+            $user = $this->em->getRepository('GameBundle:User')->findOneByHash($userHash);
+            
+            if (!$user)
+                throw new \Exception('User not found for hash '.$userHash);
+                
+            $game = $this->em->getRepository('GameBundle:Game')->findOneByHash($gameHash);
+            
+            if (!$game)
+                throw new \Exception('Game not found for hash '.$gameHash);
+                
+            if ($game->getUser() != $user->getId())
+                throw new \Exception('Access Denied');
+                
+            if ($game->getFinished() || $game->getAbandoned())
+                throw new \Exception('This game has already finished. Try start a new one');
+                
+            $game->setAbandoned(true);
+            $game->setFinished(true);
+            
+            $em = $this->em->getManager();
+
+            $em->persist($game);
+
+            $em->flush();
+            
+            $result = [
+                'success' => true,
+                'message' => 'Game finished without winners. :('
+            ];
+        }
+        catch (\Exception $e)
+        {
+            $result = [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+        
+        return $result;
     }
     
+    public function getGameUserList($userHash)
+    {
+        $validation = array();
+        
+        if (!$userHash)
+        {
+            $result = [
+                'success' => false,
+                'message' => 'Authentication Header is required'
+            ];
+            
+            return $result;
+        }
+        
+        try
+        {
+            $user = $this->em->getRepository('GameBundle:User')->findOneByHash($userHash);
+            
+            if (!$user)
+                throw new \Exception('User not found for hash '.$userHash);
+            
+            $games = $this->em->getRepository('GameBundle:Game')->findByUser($user->getId());
+            $gameList = array();
+            
+            /*array_walk($games, function($game, $key)
+            {
+                $gameList[] = array(
+                    'createdAt' => $game->getCreatedAt(),
+                    'type' => $game->getType() == 1 ? 'Regular' : 'Ultimate',
+                    'mode' => $game->getMode() == 1 ? 'Versus COM' : 'Versus Online Player',
+                    'finished' => $game->getFinished() ? 'true' : 'false',
+                    'abandoned' => $game->getAbandoned() ? 'true' : 'false',
+                    'gameplay' => json_decode($game->getGamePlay())
+                );
+            });*/
+            
+            foreach ($games as $game)
+            {
+                $gameList[] = array(
+                    'createdAt' => $game->getCreatedAt(),
+                    'gameHash' => $game->getHash(),
+                    'type' => $game->getType() == 1 ? 'Regular' : 'Ultimate',
+                    'mode' => $game->getMode() == 1 ? 'Versus COM' : 'Versus Online Player',
+                    'finished' => $game->getFinished() ? 'true' : 'false',
+                    'abandoned' => $game->getAbandoned() ? 'true' : 'false',
+                    'gameplay' => json_decode($game->getGamePlay())
+                );
+            }
+            
+            $result = [
+                'success' => true,
+                'gameList' => $gameList
+            ];
+            
+        }
+        catch (\Exception $e)
+        {
+            $result = [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
+        }
+        
+        return $result;
+    }
+
     private function generateGamePlay($game, $x = true, $column = null, $row = null, $ultimateColumn = null, $ultimateRow = null)
     {
         $gameplay = null;
@@ -178,9 +301,9 @@ class GameService {
             if ($game->getType() == 1) 
             {
                 $gameplay = array(
-                    array(BLANK_SPACE, BLANK_SPACE, BLANK_SPACE),
-                    array(BLANK_SPACE, BLANK_SPACE, BLANK_SPACE),
-                    array(BLANK_SPACE, BLANK_SPACE, BLANK_SPACE)
+                    array(GameService::BLANK_SPACE, GameService::BLANK_SPACE, GameService::BLANK_SPACE),
+                    array(GameService::BLANK_SPACE, GameService::BLANK_SPACE, GameService::BLANK_SPACE),
+                    array(GameService::BLANK_SPACE, GameService::BLANK_SPACE, GameService::BLANK_SPACE)
                 );
             }
             else
@@ -192,10 +315,10 @@ class GameService {
         {
             $gameplay = json_decode($game->getGamePlay());
             
-            if ($gameplay[$row-1][$column-1] != BLANK_SPACE)
+            if ($gameplay[$row-1][$column-1] != GameService::BLANK_SPACE)
                 throw new \Exception('Invalid movement. Please select another column and row');
                 
-            $gameplay[$row-1][$column-1] = $x ? 'X' : 'O';
+            $gameplay[$row-1][$column-1] = $x ? GameService::PLAYER_X : GameService::PLAYER_O;
         }
         
         return json_encode($gameplay);
@@ -217,7 +340,7 @@ class GameService {
             //Rows
             for ($i = 0; $i < 3; $i++)
             {
-                if (!in_array(BLANK_SPACE, $gameplay[$i]) )
+                if (!in_array(GameService::BLANK_SPACE, $gameplay[$i]) )
                 {
                     if ($gameplay[$i][0] == $gameplay[$i][1] && $gameplay[$i][1] == $gameplay[$i][2])
                     {
@@ -236,7 +359,7 @@ class GameService {
             {
                 for ($i = 0; $i < 3; $i++)
                 {
-                    if (!in_array(BLANK_SPACE, array($gameplay[0][$i], $gameplay[1][$i], $gameplay[2][$i]))
+                    if (!in_array(GameService::BLANK_SPACE, array($gameplay[0][$i], $gameplay[1][$i], $gameplay[2][$i]))
                         && $gameplay[0][$i] == $gameplay[1][$i] && $gameplay[1][$i] == $gameplay[2][$i])
                     {
                         $winner = $gameplay[0][$i];
@@ -248,7 +371,7 @@ class GameService {
             //Diagonal 1
             if (!$winner)
             {
-                if (!in_array(BLANK_SPACE, array($gameplay[0][0], $gameplay[1][1], $gameplay[2][2]))
+                if (!in_array(GameService::BLANK_SPACE, array($gameplay[0][0], $gameplay[1][1], $gameplay[2][2]))
                     && $gameplay[0][0] == $gameplay[1][1] && $gameplay[1][1] == $gameplay[2][2])
                 {
                     $winner = $gameplay[0][0];
@@ -258,7 +381,7 @@ class GameService {
             //Diagonal 2
             if (!$winner)
             {
-                if (!in_array(BLANK_SPACE, array($gameplay[0][2], $gameplay[1][1], $gameplay[2][0]))
+                if (!in_array(GameService::BLANK_SPACE, array($gameplay[0][2], $gameplay[1][1], $gameplay[2][0]))
                     && $gameplay[0][2] == $gameplay[1][1] && $gameplay[1][1] == $gameplay[2][0])
                 {
                     $winner = $gameplay[0][2];
@@ -268,7 +391,7 @@ class GameService {
             if ($winner || !$hasEmptyCel)
             {
                 if ($winner)
-                    $game->setWinner($winner == 'X' ? 'PLAYER' : 'COM');
+                    $game->setWinner($winner == GameService::PLAYER_X ? 'PLAYER' : 'COM');
                 else
                     $game->setWinner('TIE');
                 $game->setFinished(true);
@@ -292,7 +415,7 @@ class GameService {
         {
             for ($row = 0; $row < 3; $row++)
             {
-                if ($gameplay[$row][$col] == BLANK_SPACE)
+                if ($gameplay[$row][$col] == GameService::BLANK_SPACE)
                 {
                     return array('col' => $col + 1, 'row' => $row + 1);
                 }
