@@ -1,0 +1,7 @@
+services:
+    user.service:
+        class: GameBundle\Service\UserService
+        arguments: ['@doctrine']
+    game.service:
+        class: GameBundle\Service\GameService
+        arguments: ['@doctrine']

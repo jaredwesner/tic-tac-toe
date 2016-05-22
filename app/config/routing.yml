@@ -1,0 +1,10 @@
+game:
+    type:     rest
+    prefix:   /api
+    resource: GameBundle\Controller\GameController
+    
+user:
+    type:     rest
+    prefix:   /api
+    resource: GameBundle\Controller\UserController
+    
