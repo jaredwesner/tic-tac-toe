@@ -3,11 +3,15 @@
 namespace GameBundle\Controller;
 
 use FOS\RestBundle\Controller\FOSRestController;
+use FOS\RestBundle\Controller\Annotations\Post;
 use Symfony\Component\HttpFoundation\Request;
 
 class UserController extends FOSRestController
 {
-    public function postUserAction()
+    /**
+     * @Post("/user/")
+     */
+    public function userAction()
     {
         $request = Request::createFromGlobals();
         $body = json_decode($request->getContent());

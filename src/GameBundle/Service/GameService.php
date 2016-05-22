@@ -5,6 +5,8 @@ namespace GameBundle\Service;
 use GameBundle\Entity\Game;
 
 class GameService {
+    
+    CONST BLANK_SPACE = '_';
 
     protected $em;
     
@@ -176,9 +178,9 @@ class GameService {
             if ($game->getType() == 1) 
             {
                 $gameplay = array(
-                    array('_','_','_'),
-                    array('_','_','_'),
-                    array('_','_','_')
+                    array(BLANK_SPACE, BLANK_SPACE, BLANK_SPACE),
+                    array(BLANK_SPACE, BLANK_SPACE, BLANK_SPACE),
+                    array(BLANK_SPACE, BLANK_SPACE, BLANK_SPACE)
                 );
             }
             else
@@ -190,7 +192,7 @@ class GameService {
         {
             $gameplay = json_decode($game->getGamePlay());
             
-            if ($gameplay[$row-1][$column-1] != '_')
+            if ($gameplay[$row-1][$column-1] != BLANK_SPACE)
                 throw new \Exception('Invalid movement. Please select another column and row');
                 
             $gameplay[$row-1][$column-1] = $x ? 'X' : 'O';
@@ -215,7 +217,7 @@ class GameService {
             //Rows
             for ($i = 0; $i < 3; $i++)
             {
-                if (!in_array('_', $gameplay[$i]) )
+                if (!in_array(BLANK_SPACE, $gameplay[$i]) )
                 {
                     if ($gameplay[$i][0] == $gameplay[$i][1] && $gameplay[$i][1] == $gameplay[$i][2])
                     {
@@ -234,7 +236,7 @@ class GameService {
             {
                 for ($i = 0; $i < 3; $i++)
                 {
-                    if (!in_array('_', array($gameplay[0][$i], $gameplay[1][$i], $gameplay[2][$i]))
+                    if (!in_array(BLANK_SPACE, array($gameplay[0][$i], $gameplay[1][$i], $gameplay[2][$i]))
                         && $gameplay[0][$i] == $gameplay[1][$i] && $gameplay[1][$i] == $gameplay[2][$i])
                     {
                         $winner = $gameplay[0][$i];
@@ -246,7 +248,7 @@ class GameService {
             //Diagonal 1
             if (!$winner)
             {
-                if (!in_array('_', array($gameplay[0][0], $gameplay[1][1], $gameplay[2][2]))
+                if (!in_array(BLANK_SPACE, array($gameplay[0][0], $gameplay[1][1], $gameplay[2][2]))
                     && $gameplay[0][0] == $gameplay[1][1] && $gameplay[1][1] == $gameplay[2][2])
                 {
                     $winner = $gameplay[0][0];
@@ -256,7 +258,7 @@ class GameService {
             //Diagonal 2
             if (!$winner)
             {
-                if (!in_array('_', array($gameplay[0][2], $gameplay[1][1], $gameplay[2][0]))
+                if (!in_array(BLANK_SPACE, array($gameplay[0][2], $gameplay[1][1], $gameplay[2][0]))
                     && $gameplay[0][2] == $gameplay[1][1] && $gameplay[1][1] == $gameplay[2][0])
                 {
                     $winner = $gameplay[0][2];
@@ -282,11 +284,15 @@ class GameService {
     {
         $gameplay = json_decode($game->getGamePlay());
         
+        // First, Is it possible to win with this movement?
+        
+        // If not to win then must get in users way
+        
         for ($col = 0; $col < 3; $col++)
         {
             for ($row = 0; $row < 3; $row++)
             {
-                if ($gameplay[$row][$col] == '_')
+                if ($gameplay[$row][$col] == BLANK_SPACE)
                 {
                     return array('col' => $col + 1, 'row' => $row + 1);
                 }

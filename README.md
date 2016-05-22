@@ -7,7 +7,10 @@ A Symfony project created on May 20, 2016, 11:29 pm.
 
 Installation
 
+composer install
+
 php bin/console doctrine:database:create
+
 php bin/console doctrine:schema:update --force
 
 

@@ -58,7 +58,7 @@ class GameController extends FOSRestController
         if ($result['success'])
         {
             $tmp = array();
-            $tmp['gameplay'] = $result['gameplay'];
+            $tmp['gameplay'] = json_decode($result['gameplay']);
             if (array_key_exists('winner', $result))
                 $tmp['winner'] = $result['winner'];
             $view = $this->view($tmp, 200);
