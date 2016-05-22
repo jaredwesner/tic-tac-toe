@@ -250,34 +250,23 @@ class GameService {
             $games = $this->em->getRepository('GameBundle:Game')->findByUser($user->getId());
             $gameList = array();
             
-            /*array_walk($games, function($game, $key)
+            array_walk($games, function(&$game)
             {
-                $gameList[] = array(
-                    'createdAt' => $game->getCreatedAt(),
-                    'type' => $game->getType() == 1 ? 'Regular' : 'Ultimate',
-                    'mode' => $game->getMode() == 1 ? 'Versus COM' : 'Versus Online Player',
-                    'finished' => $game->getFinished() ? 'true' : 'false',
-                    'abandoned' => $game->getAbandoned() ? 'true' : 'false',
-                    'gameplay' => json_decode($game->getGamePlay())
-                );
-            });*/
-            
-            foreach ($games as $game)
-            {
-                $gameList[] = array(
-                    'createdAt' => $game->getCreatedAt(),
+                $game = array(
                     'gameHash' => $game->getHash(),
+                    'createdAt' => $game->getCreatedAt(),
                     'type' => $game->getType() == 1 ? 'Regular' : 'Ultimate',
                     'mode' => $game->getMode() == 1 ? 'Versus COM' : 'Versus Online Player',
                     'finished' => $game->getFinished() ? 'true' : 'false',
                     'abandoned' => $game->getAbandoned() ? 'true' : 'false',
-                    'gameplay' => json_decode($game->getGamePlay())
+                    'gameplay' => json_decode($game->getGamePlay()),
+                    'winner' => $game->getWinner()
                 );
-            }
+            });
             
             $result = [
                 'success' => true,
-                'gameList' => $gameList
+                'gameList' => $games
             ];
             
         }

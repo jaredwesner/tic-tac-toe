@@ -16,21 +16,35 @@ class UserController extends FOSRestController
         $request = Request::createFromGlobals();
         $body = json_decode($request->getContent());
         $service = $this->get('user.service');
-        
-        $result = $service->login($body->email, $body->password);        
         $view = null;
+        $jsonValidation = array();
         
-        if ($result['success'])
+        if (!isset($body->email))
+            $jsonValidation[] = 'email is required on json body';
+        
+        if (!isset($body->password))
+            $jsonValidation[] = 'password is required on json body';
+        
+        if ($jsonValidation)
         {
-            $view = $this->view([
-                'userHash' => $result['userHash']
-            ], 200);
+            $view = $this->view($jsonValidation, 400);
         }
         else
         {
-            $view = $this->view([
-                'error' => $result['message']
-            ], 400);
+            $result = $service->login($body->email, $body->password);
+            
+            if ($result['success'])
+            {
+                $view = $this->view([
+                    'userHash' => $result['userHash']
+                ], 200);
+            }
+            else
+            {
+                $view = $this->view([
+                    'error' => $result['message']
+                ], 400);
+            }
         }
         
         return $this->handleView($view);

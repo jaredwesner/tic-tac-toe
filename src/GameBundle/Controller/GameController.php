@@ -20,8 +20,6 @@ class GameController extends FOSRestController
         $service = $this->get('game.service');
         $view = null;
         
-        $body = json_decode($request->getContent());
-        
         $result = $service->start($userHash, $type, $mode);
         
         if ($result['success'])
@@ -47,28 +45,40 @@ class GameController extends FOSRestController
     {
         $request = Request::createFromGlobals();
         $userHash = $request->headers->get('Authorization');
+        $body = json_decode($request->getContent());
         $service = $this->get('game.service');        
         $view = null;
+        $jsonValidation = array();
         
-        $body = json_decode($request->getContent());
+        if (!isset($body->column))
+            $jsonValidation[] = 'column is required on json body';
         
-        $result = $service->play($userHash, $gameHash, $body->column, $body->row);
+        if (!isset($body->row))
+            $jsonValidation[] = 'row is required on json body';
         
-        if ($result['success'])
+        if ($jsonValidation)
         {
-            $tmp = array();
-            $tmp['gameplay'] = json_decode($result['gameplay']);
-            if (array_key_exists('winner', $result))
-                $tmp['winner'] = $result['winner'];
-            $view = $this->view($tmp, 200);
+            $view = $this->view($jsonValidation, 400);
         }
         else
         {
-            $view = $this->view([
-                'error' => $result['message']
-            ], 400);
+            $result = $service->play($userHash, $gameHash, $body->column, $body->row);
+            
+            if ($result['success'])
+            {
+                $tmp = array();
+                $tmp['gameplay'] = json_decode($result['gameplay']);
+                if (array_key_exists('winner', $result))
+                    $tmp['winner'] = $result['winner'];
+                $view = $this->view($tmp, 200);
+            }
+            else
+            {
+                $view = $this->view([
+                    'error' => $result['message']
+                ], 400);
+            }
         }
-        
         return $this->handleView($view);
     }
     
